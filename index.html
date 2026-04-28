@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Fueller — Find the cheapest petrol and diesel near you. Free, no sign-up. Coming soon to Android." />
+  <meta property="og:title" content="Fueller" />
+  <meta property="og:description" content="Find the cheapest petrol and diesel near you. Free, no sign-up. Coming soon to Android." />
+  <meta property="og:url" content="https://fueller.app" />
+  <meta name="theme-color" content="#0d0d0d" />
+  <title>Fueller — Cheapest Fuel Near You</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --yellow: #F5C518;
+      --green: #22C55E;
+      --bg: #0d0d0d;
+      --surface: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #ffffff;
+      --muted: #888888;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Noise texture overlay ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Glow blob ── */
+    .glow {
+      position: fixed;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 500px;
+      background: radial-gradient(ellipse at center, rgba(245,197,24,0.12) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Layout ── */
+    main {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      text-align: center;
+    }
+
+    /* ── Icon ── */
+    .icon-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      margin-bottom: 32px;
+    }
+
+    .icon-wrap svg {
+      width: 44px;
+      height: 44px;
+    }
+
+    /* ── Wordmark ── */
+    .wordmark {
+      font-size: clamp(52px, 10vw, 88px);
+      font-weight: 900;
+      letter-spacing: -3px;
+      line-height: 1;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #ffffff 40%, #F5C518 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── Price board badge ── */
+    .price-board {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--green);
+      margin-bottom: 28px;
+      letter-spacing: 0.02em;
+    }
+
+    .price-board .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* ── Tagline ── */
+    .tagline {
+      font-size: clamp(18px, 3.5vw, 26px);
+      font-weight: 600;
+      color: #cccccc;
+      max-width: 560px;
+      line-height: 1.4;
+      margin-bottom: 16px;
+    }
+
+    .tagline strong {
+      color: var(--yellow);
+    }
+
+    /* ── Description ── */
+    .desc {
+      font-size: clamp(14px, 2vw, 16px);
+      color: var(--muted);
+      max-width: 440px;
+      line-height: 1.6;
+      margin-bottom: 48px;
+    }
+
+    /* ── Pill features ── */
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 52px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 8px 16px;
+      font-size: 13px;
+      color: #cccccc;
+      font-weight: 500;
+    }
+
+    .pill .emoji {
+      font-size: 14px;
+    }
+
+    /* ── Coming soon badge ── */
+    .coming-soon {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 24px;
+    }
+
+    .coming-soon svg {
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    .coming-soon-text {
+      text-align: left;
+    }
+
+    .coming-soon-text .label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 2px;
+    }
+
+    .coming-soon-text .store {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* ── Footer ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      padding: 24px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+
+    footer a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: var(--text);
+    }
+
+    /* ── Price ticker decoration ── */
+    .ticker {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 40px;
+      align-items: flex-end;
+    }
+
+    .price-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 16px;
+      text-align: center;
+      min-width: 80px;
+    }
+
+    .price-card .fuel-type {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .price-card .price {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .price-card.cheapest {
+      border-color: rgba(34, 197, 94, 0.4);
+      background: rgba(34, 197, 94, 0.06);
+    }
+
+    .price-card.cheapest .price {
+      color: var(--green);
+    }
+
+    .price-card.mid .price {
+      color: var(--yellow);
+    }
+
+    .price-card .price-unit {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .ticker-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 4px;
+      text-align: center;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="glow"></div>
+
+  <main>
+
+    <!-- App icon -->
+    <div class="icon-wrap">
+      <!-- Fuel pump SVG -->
+      <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="6" y="10" width="20" height="26" rx="3" stroke="#F5C518" stroke-width="2.2"/>
+        <rect x="10" y="14" width="12" height="7" rx="1.5" fill="#F5C518" fill-opacity="0.2" stroke="#F5C518" stroke-width="1.8"/>
+        <path d="M26 16 L32 12 L32 28 C32 29.1 31.1 30 30 30 L28 30" stroke="#F5C518" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="30" cy="11" r="2" fill="#22C55E"/>
+        <line x1="16" y1="30" x2="16" y2="36" stroke="#F5C518" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <!-- Wordmark -->
+    <h1 class="wordmark">Fueller</h1>
+
+    <!-- Status badge -->
+    <div class="price-board">
+      <span class="dot"></span>
+      Coming soon to Android
+    </div>
+
+    <!-- Tagline -->
+    <p class="tagline">
+      Find the <strong>cheapest petrol &amp; diesel</strong> near you — instantly.
+    </p>
+
+    <!-- Description -->
+    <p class="desc">
+      One tap. GPS finds your location. Fueller shows you the nearest stations sorted by price, powered by government data. Free. No account. No nonsense.
+    </p>
+
+    <!-- Decorative price cards -->
+    <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 40px;">
+      <div class="ticker-label">Stations near you, sorted by price</div>
+      <div class="ticker">
+        <div class="price-card cheapest">
+          <div class="fuel-type">Diesel</div>
+          <div class="price">142.9</div>
+          <div class="price-unit">p/litre</div>
+        </div>
+        <div class="price-card mid">
+          <div class="fuel-type">Diesel</div>
+          <div class="price">145.7</div>
+          <div class="price-unit">p/litre</div>
+        </div>
+        <div class="price-card">
+          <div class="fuel-type">Diesel</div>
+          <div class="price">148.2</div>
+          <div class="price-unit">p/litre</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature pills -->
+    <div class="features">
+      <div class="pill"><span class="emoji">⚡</span> One-tap search</div>
+      <div class="pill"><span class="emoji">🏛️</span> Government data</div>
+      <div class="pill"><span class="emoji">🔒</span> No sign-up needed</div>
+      <div class="pill"><span class="emoji">💰</span> Always free</div>
+      <div class="pill"><span class="emoji">🗺️</span> Map view included</div>
+    </div>
+
+    <!-- Google Play coming soon -->
+    <div class="coming-soon">
+      <!-- Google Play logo -->
+      <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3.5 3.5 L14.5 14 L3.5 24.5 L3.5 3.5Z" fill="#34A853"/>
+        <path d="M3.5 3.5 L18 10.5 L14.5 14 L3.5 3.5Z" fill="#FBBC04"/>
+        <path d="M3.5 24.5 L14.5 14 L18 17.5 L3.5 24.5Z" fill="#EA4335"/>
+        <path d="M18 10.5 L24 14 L18 17.5 L14.5 14 L18 10.5Z" fill="#4285F4"/>
+      </svg>
+      <div class="coming-soon-text">
+        <div class="label">Coming soon on</div>
+        <div class="store">Google Play</div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Fueller &nbsp;·&nbsp; <a href="mailto:hello@fueller.app">hello@fueller.app</a> &nbsp;·&nbsp; Made in the UK 🇬🇧</p>
+  </footer>
+
+</body>
+</html>
