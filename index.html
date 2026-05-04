@@ -1,397 +1,1042 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Fueller — Find the cheapest petrol and diesel near you. Free, no sign-up. Coming soon to Android." />
-  <meta property="og:title" content="Fueller" />
-  <meta property="og:description" content="Find the cheapest petrol and diesel near you. Free, no sign-up. Coming soon to Android." />
-  <meta property="og:url" content="https://fueller.app" />
-  <meta name="theme-color" content="#0d0d0d" />
-  <title>Fueller — Cheapest Fuel Near You</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fueller — Find the cheapest petrol & diesel near you</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-    :root {
-      --yellow: #F5C518;
-      --green: #22C55E;
-      --bg: #0d0d0d;
-      --surface: #1a1a1a;
-      --border: #2a2a2a;
-      --text: #ffffff;
-      --muted: #888888;
-    }
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 
-    html, body {
-      height: 100%;
-    }
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+  :root {
+    --amber: oklch(78% 0.18 85);
+    --amber-dim: oklch(65% 0.16 85);
+    --amber-glow: oklch(78% 0.18 85 / 0.18);
+    --green: oklch(72% 0.18 145);
+    --green-dim: oklch(60% 0.14 145);
+    --bg-0: oklch(10% 0.01 60);
+    --bg-1: oklch(13% 0.015 60);
+    --bg-2: oklch(17% 0.015 60);
+    --bg-3: oklch(22% 0.015 60);
+    --border: oklch(28% 0.015 60);
+    --text-1: oklch(97% 0.005 80);
+    --text-2: oklch(82% 0.01 80);
+    --text-3: oklch(65% 0.01 80);
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+  }
 
-    /* ── Noise texture overlay ── */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-    }
+  html { scroll-behavior: smooth; }
 
-    /* ── Glow blob ── */
-    .glow {
-      position: fixed;
-      top: -200px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 700px;
-      height: 500px;
-      background: radial-gradient(ellipse at center, rgba(245,197,24,0.12) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-    }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg-0);
+    color: var(--text-1);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
 
-    /* ── Layout ── */
-    main {
-      position: relative;
-      z-index: 1;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 48px 24px;
-      text-align: center;
-    }
+  /* ── Noise texture overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.35;
+  }
 
-    /* ── Icon ── */
-    .icon-wrap {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 80px;
-      height: 80px;
-      border-radius: 20px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      margin-bottom: 32px;
-    }
+  /* ── Scroll reveal ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.65s cubic-bezier(.22,.68,0,1), transform 0.65s cubic-bezier(.22,.68,0,1);
+  }
+  .reveal.visible { opacity: 1; transform: none; }
 
-    .icon-wrap svg {
-      width: 44px;
-      height: 44px;
-    }
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    height: 60px;
+    background: oklch(10% 0.01 60 / 0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid oklch(28% 0.015 60 / 0.5);
+  }
 
-    /* ── Wordmark ── */
-    .wordmark {
-      font-size: clamp(52px, 10vw, 88px);
-      font-weight: 900;
-      letter-spacing: -3px;
-      line-height: 1;
-      margin-bottom: 8px;
-      background: linear-gradient(135deg, #ffffff 40%, #F5C518 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
 
-    /* ── Price board badge ── */
-    .price-board {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      padding: 6px 14px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--green);
-      margin-bottom: 28px;
-      letter-spacing: 0.02em;
-    }
+  .nav-icon {
+    width: 30px; height: 30px;
+    background: var(--bg-2);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border);
+  }
 
-    .price-board .dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--green);
-      animation: pulse 2s ease-in-out infinite;
-    }
+  .nav-wordmark {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+    color: var(--text-1);
+  }
+  .nav-wordmark { color: var(--text-1); } /* Fuel = white */
+  .nav-wordmark span { color: var(--amber); } /* ler = amber — design token: wordmark-accent */
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
+  .nav-pill {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--green);
+    background: oklch(72% 0.18 145 / 0.12);
+    border: 1px solid oklch(72% 0.18 145 / 0.3);
+    border-radius: 100px;
+    padding: 4px 12px;
+  }
 
-    /* ── Tagline ── */
-    .tagline {
-      font-size: clamp(18px, 3.5vw, 26px);
-      font-weight: 600;
-      color: #cccccc;
-      max-width: 560px;
-      line-height: 1.4;
-      margin-bottom: 16px;
-    }
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 24px 80px;
+    position: relative;
+    overflow: hidden;
+  }
 
-    .tagline strong {
-      color: var(--yellow);
-    }
+  .hero-glow {
+    position: absolute;
+    top: -120px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, oklch(78% 0.18 85 / 0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
 
-    /* ── Description ── */
-    .desc {
-      font-size: clamp(14px, 2vw, 16px);
-      color: var(--muted);
-      max-width: 440px;
-      line-height: 1.6;
-      margin-bottom: 48px;
-    }
+  .hero-icon {
+    width: 72px; height: 72px;
+    background: var(--bg-2);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 28px;
+    box-shadow: 0 0 40px oklch(78% 0.18 85 / 0.15);
+  }
 
-    /* ── Pill features ── */
-    .features {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      margin-bottom: 52px;
-    }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--green);
+    background: oklch(72% 0.18 145 / 0.1);
+    border: 1px solid oklch(72% 0.18 145 / 0.25);
+    border-radius: 100px;
+    padding: 5px 14px;
+    margin-bottom: 28px;
+    letter-spacing: 0.03em;
+  }
+  .hero-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    flex-shrink: 0;
+  }
 
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      padding: 8px 16px;
-      font-size: 13px;
-      color: #cccccc;
-      font-weight: 500;
-    }
+  .hero-wordmark {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: clamp(72px, 12vw, 130px);
+    line-height: 0.92;
+    letter-spacing: 0.04em;
+    margin-bottom: 32px;
+    color: var(--text-1);
+  }
+  .hero-wordmark { color: var(--text-1); } /* Fuel = white */
+  .hero-wordmark span { color: var(--amber); } /* ler = amber — design token: wordmark-accent */
 
-    .pill .emoji {
-      font-size: 14px;
-    }
+  .hero-headline {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    font-size: clamp(22px, 3.5vw, 34px);
+    line-height: 1.3;
+    color: var(--text-2);
+    max-width: 600px;
+    margin: 0 auto 16px;
+    text-wrap: pretty;
+  }
+  .hero-headline strong {
+    color: var(--amber);
+    font-weight: 600;
+  }
 
-    /* ── Coming soon badge ── */
-    .coming-soon {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px 24px;
-    }
+  .hero-sub {
+    font-size: 16px;
+    color: var(--text-3);
+    max-width: 460px;
+    margin: 0 auto 48px;
+    line-height: 1.65;
+    text-wrap: pretty;
+  }
 
-    .coming-soon svg {
-      width: 28px;
-      height: 28px;
-      flex-shrink: 0;
-    }
+  /* Price preview widget */
+  .price-widget {
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px 16px;
+    margin-bottom: 48px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 24px 60px oklch(0% 0 0 / 0.4), 0 0 0 1px oklch(100% 0 0 / 0.03);
+  }
 
-    .coming-soon-text {
-      text-align: left;
-    }
+  .price-widget-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 14px;
+  }
 
-    .coming-soon-text .label {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 2px;
-    }
+  .price-cells {
+    display: flex;
+    gap: 8px;
+  }
 
-    .coming-soon-text .store {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text);
-    }
+  .price-cell {
+    flex: 1;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+  }
+  .price-cell.best {
+    border-color: oklch(72% 0.18 145 / 0.4);
+    background: oklch(72% 0.18 145 / 0.06);
+  }
+  .price-cell.best::after {
+    content: 'BEST';
+    position: absolute;
+    top: 8px; right: 8px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--green);
+    background: oklch(72% 0.18 145 / 0.15);
+    border-radius: 4px;
+    padding: 2px 5px;
+  }
 
-    /* ── Footer ── */
-    footer {
-      position: relative;
-      z-index: 1;
-      padding: 24px;
-      text-align: center;
-      font-size: 13px;
-      color: var(--muted);
-      border-top: 1px solid var(--border);
-    }
+  .price-cell-type {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 6px;
+  }
 
-    footer a {
-      color: var(--muted);
-      text-decoration: none;
-    }
+  .price-cell-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 32px;
+    line-height: 1;
+    color: var(--text-1);
+    letter-spacing: -0.02em;
+  }
+  .price-cell.best .price-cell-value { color: var(--green); }
 
-    footer a:hover {
-      color: var(--text);
-    }
+  .price-cell-unit {
+    font-size: 11px;
+    color: var(--text-3);
+    margin-top: 4px;
+  }
 
-    /* ── Price ticker decoration ── */
-    .ticker {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 40px;
-      align-items: flex-end;
-    }
+  /* Feature chips */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 48px;
+  }
 
-    .price-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px 16px;
-      text-align: center;
-      min-width: 80px;
-    }
+  .chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-2);
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 7px 16px;
+    white-space: nowrap;
+  }
+  .chip svg { opacity: 0.7; flex-shrink: 0; }
 
-    .price-card .fuel-type {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-      margin-bottom: 4px;
-    }
+  /* CTA button */
+  .cta-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
 
-    .price-card .price {
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-    }
+  .btn-play {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px 28px;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    cursor: pointer;
+  }
+  .btn-play:hover {
+    background: var(--bg-3);
+    border-color: oklch(40% 0.015 60);
+    transform: translateY(-1px);
+  }
 
-    .price-card.cheapest {
-      border-color: rgba(34, 197, 94, 0.4);
-      background: rgba(34, 197, 94, 0.06);
-    }
+  .btn-play-text { text-align: left; }
+  .btn-play-text .top { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); }
+  .btn-play-text .bottom { font-size: 18px; font-weight: 600; color: var(--text-1); }
 
-    .price-card.cheapest .price {
-      color: var(--green);
-    }
+  /* ── HOW IT WORKS ── */
+  .section {
+    padding: 100px 24px;
+    max-width: 1080px;
+    margin: 0 auto;
+  }
 
-    .price-card.mid .price {
-      color: var(--yellow);
-    }
+  .section-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 16px;
+  }
 
-    .price-card .price-unit {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: clamp(36px, 5vw, 56px);
+    letter-spacing: 0.03em;
+    line-height: 1.05;
+    color: var(--text-1);
+    margin-bottom: 56px;
+  }
 
-    .ticker-label {
-      font-size: 11px;
-      color: var(--muted);
-      margin-bottom: 4px;
-      text-align: center;
-      width: 100%;
-    }
-  </style>
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+
+  @media (max-width: 680px) {
+    .steps { grid-template-columns: 1fr; }
+    nav { padding: 0 20px; }
+    .hero { padding: 100px 20px 60px; }
+    .section { padding: 72px 20px; }
+  }
+
+  .step {
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    padding: 36px 32px;
+    position: relative;
+    transition: background 0.2s;
+  }
+  .step:first-child { border-radius: var(--radius-lg) 0 0 var(--radius-lg); }
+  .step:last-child { border-radius: 0 var(--radius-lg) var(--radius-lg) 0; }
+  .step:hover { background: var(--bg-2); }
+
+  .step-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 72px;
+    line-height: 1;
+    color: oklch(28% 0.015 60);
+    margin-bottom: 20px;
+    letter-spacing: -0.03em;
+  }
+
+  .step-icon {
+    width: 44px; height: 44px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .step-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: 0.01em;
+    color: var(--text-1);
+    margin-bottom: 10px;
+  }
+
+  .step-body {
+    font-size: 14px;
+    color: var(--text-3);
+    line-height: 1.65;
+  }
+
+  /* ── FEATURES GRID ── */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+
+  @media (max-width: 800px) {
+    .features-grid { grid-template-columns: 1fr 1fr; }
+    .steps { grid-template-columns: 1fr; }
+    .step:first-child, .step:last-child { border-radius: 0; }
+    .step:first-child { border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+    .step:last-child { border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+  }
+
+  .feat {
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    padding: 32px 28px;
+    transition: background 0.2s;
+  }
+  .feat:hover { background: var(--bg-2); }
+  .feat:first-child { border-radius: var(--radius-lg) 0 0 0; }
+  .feat:nth-child(3) { border-radius: 0 var(--radius-lg) 0 0; }
+  .feat:nth-child(4) { border-radius: 0 0 0 var(--radius-lg); }
+  .feat:last-child { border-radius: 0 0 var(--radius-lg) 0; }
+
+  .feat-icon {
+    width: 40px; height: 40px;
+    background: var(--amber-glow);
+    border: 1px solid oklch(78% 0.18 85 / 0.25);
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px;
+    color: var(--amber);
+  }
+
+  .feat-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--text-1);
+    margin-bottom: 8px;
+  }
+
+  .feat-body {
+    font-size: 14px;
+    color: var(--text-3);
+    line-height: 1.65;
+  }
+
+  /* ── PHONE SECTION ── */
+  .phone-section {
+    padding: 80px 24px 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
+    background: linear-gradient(to bottom, transparent, oklch(13% 0.015 60 / 0.6), transparent);
+  }
+
+  .phone-section-text {
+    text-align: center;
+    max-width: 480px;
+  }
+
+  .phone-wrapper {
+    position: relative;
+  }
+
+  /* ── BOTTOM CTA ── */
+  .bottom-cta {
+    padding: 100px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .bottom-cta::before {
+    content: '';
+    position: absolute;
+    bottom: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, oklch(78% 0.18 85 / 0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .bottom-cta-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: clamp(42px, 7vw, 80px);
+    letter-spacing: 0.04em;
+    line-height: 1;
+    margin-bottom: 20px;
+  }
+  .bottom-cta-title span { color: var(--amber); }
+
+  .bottom-cta-sub {
+    font-size: 16px;
+    color: var(--text-3);
+    margin-bottom: 40px;
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Email form */
+  .notify-form {
+    display: flex;
+    gap: 8px;
+    max-width: 400px;
+    margin: 0 auto 20px;
+  }
+
+  .notify-input {
+    flex: 1;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--text-1);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .notify-input::placeholder { color: var(--text-3); }
+  .notify-input:focus { border-color: var(--amber-dim); }
+
+  .notify-btn {
+    background: var(--amber);
+    color: oklch(12% 0.02 60);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 12px 22px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .notify-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  .notify-note {
+    font-size: 12px;
+    color: var(--text-3);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 28px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--text-3);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 24px;
+  }
+
+  .footer-links a {
+    color: var(--text-3);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--text-2); }
+
+  /* Divider */
+  .section-divider {
+    width: 100%;
+    max-width: 1080px;
+    margin: 0 auto;
+    height: 1px;
+    background: var(--border);
+    opacity: 0.5;
+  }
+
+  /* success state */
+  .notify-success {
+    font-size: 14px;
+    color: var(--green);
+    font-weight: 500;
+    display: none;
+    margin-top: 8px;
+  }
+  .notify-success.show { display: block; }
+</style>
 </head>
 <body>
 
-  <div class="glow"></div>
-
-  <main>
-
-    <!-- App icon -->
-    <div class="icon-wrap">
-      <!-- Fuel pump SVG -->
-      <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="6" y="10" width="20" height="26" rx="3" stroke="#F5C518" stroke-width="2.2"/>
-        <rect x="10" y="14" width="12" height="7" rx="1.5" fill="#F5C518" fill-opacity="0.2" stroke="#F5C518" stroke-width="1.8"/>
-        <path d="M26 16 L32 12 L32 28 C32 29.1 31.1 30 30 30 L28 30" stroke="#F5C518" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="30" cy="11" r="2" fill="#22C55E"/>
-        <line x1="16" y1="30" x2="16" y2="36" stroke="#F5C518" stroke-width="2.2" stroke-linecap="round"/>
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="nav-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path d="M6 2h8l4 4v3h2v10a1 1 0 01-1 1H5a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="oklch(78% 0.18 85)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M9 10h4M9 14h2" stroke="oklch(78% 0.18 85)" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M14 2v5h5" stroke="oklch(78% 0.18 85)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
+    <span class="nav-wordmark">Fuel<span>ler</span></span>
+  </a>
+  <span class="nav-pill">Coming soon to Android</span>
+</nav>
 
-    <!-- Wordmark -->
-    <h1 class="wordmark">Fueller</h1>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
 
-    <!-- Status badge -->
-    <div class="price-board">
-      <span class="dot"></span>
-      Coming soon to Android
+  <div class="hero-icon" style="display:none">
+    <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+      <path d="M6 2h8l4 4v3h2v10a1 1 0 01-1 1H5a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="oklch(78% 0.18 85)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M9 10h4M9 14h2" stroke="oklch(78% 0.18 85)" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M14 2v5h5" stroke="oklch(78% 0.18 85)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <div class="hero-badge">Coming soon to Android</div>
+
+  <h1 class="hero-wordmark">Fuel<span>ler</span></h1>
+
+  <p class="hero-headline">
+    Find the <strong>cheapest petrol &amp; diesel</strong> near you — instantly.
+  </p>
+
+  <p class="hero-sub">
+    One tap. GPS finds your location. Fueller shows you the nearest stations sorted by price, powered by UK Government data. Free. No account. No nonsense.
+  </p>
+
+  <!-- Price widget -->
+  <div class="price-widget reveal">
+    <div class="price-widget-label">Stations near you, sorted by price</div>
+    <div class="price-cells">
+      <div class="price-cell best">
+        <div class="price-cell-type">Petrol</div>
+        <div class="price-cell-value" id="p-petrol">142.9</div>
+        <div class="price-cell-unit">p/gallon</div>
+      </div>
+      <div class="price-cell">
+        <div class="price-cell-type">Diesel</div>
+        <div class="price-cell-value" id="p-diesel">145.7</div>
+        <div class="price-cell-unit">p/gallon</div>
+      </div>
+      <div class="price-cell">
+        <div class="price-cell-type">Premium</div>
+        <div class="price-cell-value" id="p-premium">148.2</div>
+        <div class="price-cell-unit">p/gallon</div>
+      </div>
     </div>
+  </div>
 
-    <!-- Tagline -->
-    <p class="tagline">
-      Find the <strong>cheapest petrol &amp; diesel</strong> near you — instantly.
-    </p>
+  <!-- Chips -->
+  <div class="chips reveal">
+    <div class="chip">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      One-tap search
+    </div>
+    <div class="chip">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      UK Government data
+    </div>
+    <div class="chip">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8v4l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      No sign-up needed
+    </div>
+    <div class="chip">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      Always free
+    </div>
+    <div class="chip">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><path d="M21 21l-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Map view included
+    </div>
+  </div>
 
-    <!-- Description -->
-    <p class="desc">
-      One tap. GPS finds your location. Fueller shows you the nearest stations sorted by price, powered by UK Government data. Free. No account. No nonsense.
-    </p>
+  <!-- CTA -->
+  <div class="cta-group reveal">
+    <a class="btn-play" href="#">
+      <svg width="28" height="28" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <path d="M48 432.6V79.4c0-8.2 9.1-13.1 15.9-8.3L288 256 63.9 440.9c-6.8 4.8-15.9-.1-15.9-8.3z" fill="#4285F4"/>
+        <path d="M348.9 195.4L99.1 51.7 299.4 256 348.9 195.4z" fill="#34A853"/>
+        <path d="M348.9 316.6L299.4 256 99.1 460.3l249.8-143.7z" fill="#EA4335"/>
+        <path d="M432 279.4l-83.1 37.2L299.4 256l49.5-60.6 83.1 37.2c18.7 8.4 18.7 38.4 0 46.8z" fill="#FBBC04"/>
+      </svg>
+      <div class="btn-play-text">
+        <div class="top">Coming soon on</div>
+        <div class="bottom">Google Play</div>
+      </div>
+    </a>
+  </div>
+</section>
 
-    <!-- Decorative price cards -->
-    <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 40px;">
-      <div class="ticker-label">Stations near you, sorted by price</div>
-      <div class="ticker">
-        <div class="price-card cheapest">
-          <div class="fuel-type">Petrol</div>
-          <div class="price">142.9</div>
-          <div class="price-unit">p/litre</div>
+<!-- DIVIDER -->
+<div class="section-divider"></div>
+
+<!-- HOW IT WORKS -->
+<div class="section">
+  <p class="section-eyebrow reveal">How it works</p>
+  <h2 class="section-title reveal">Three taps.<br>Cheaper fuel.</h2>
+  <div class="steps">
+    <div class="step reveal">
+      <div class="step-num">01</div>
+      <div class="step-title">Open the app</div>
+      <p class="step-body">Launch Fueller. No account, no setup. GPS activates automatically and pinpoints your location.</p>
+    </div>
+    <div class="step reveal" style="transition-delay: 0.1s">
+      <div class="step-num">02</div>
+      <div class="step-title">See nearby stations</div>
+      <p class="step-body">A live-updated list of petrol stations near you, sorted cheapest first. Powered by official UK Government fuel price data.</p>
+    </div>
+    <div class="step reveal" style="transition-delay: 0.2s">
+      <div class="step-num">03</div>
+      <div class="step-title">Drive &amp; save</div>
+      <p class="step-body">Tap any station to get directions. Fill up. Save money every single time.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- FEATURES -->
+<div class="section">
+  <p class="section-eyebrow reveal">Why Fueller</p>
+  <h2 class="section-title reveal">Built around one thing:<br>saving you money.</h2>
+  <div class="features-grid">
+    <div class="feat reveal">
+      <div class="feat-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z" fill="currentColor"/></svg>
+      </div>
+      <div class="feat-title">GPS-first design</div>
+      <p class="feat-body">No postcodes to type. Fueller uses your real-time location so results are always relevant to where you are right now.</p>
+    </div>
+    <div class="feat reveal" style="transition-delay: 0.08s">
+      <div class="feat-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="feat-title">Official data source</div>
+      <p class="feat-body">Prices come directly from the UK Government's mandatory reporting scheme — updated daily from fuel retailers across Britain.</p>
+    </div>
+    <div class="feat reveal" style="transition-delay: 0.16s">
+      <div class="feat-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="feat-title">Instant results</div>
+      <p class="feat-body">No loading spinners, no waiting. Your nearest cheap station appears the moment you open the app.</p>
+    </div>
+    <div class="feat reveal" style="transition-delay: 0.0s">
+      <div class="feat-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 9m0 8V9m0 0L9 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="feat-title">Map view</div>
+      <p class="feat-body">Switch to map mode to see stations plotted around you. Plan your route without opening another app.</p>
+    </div>
+    <div class="feat reveal" style="transition-delay: 0.08s">
+      <div class="feat-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="feat-title">No account needed</div>
+      <p class="feat-body">Zero sign-ups, zero emails, zero tracking. Download and use it — that's all there is to it.</p>
+    </div>
+    <div class="feat reveal" style="transition-delay: 0.16s">
+      <div class="feat-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="feat-title">Completely free</div>
+      <p class="feat-body">No premium tier, no ads, no in-app purchases. Fueller is free — because saving money shouldn't cost money.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- PHONE MOCKUP SECTION -->
+<div id="phone-section-root"></div>
+
+<div class="section-divider"></div>
+
+<!-- BOTTOM CTA -->
+<div class="bottom-cta">
+  <h2 class="bottom-cta-title reveal">Be first to<br><span>fill up cheaper.</span></h2>
+  <p class="bottom-cta-sub reveal">Get notified the moment Fueller launches on Google Play.</p>
+  <div class="reveal">
+    <div class="notify-form">
+      <input type="email" class="notify-input" id="email-input" placeholder="your@email.com">
+      <button class="notify-btn" id="notify-btn">Notify me</button>
+    </div>
+    <div class="notify-success" id="notify-success">✓ You're on the list — we'll let you know when we launch!</div>
+    <p class="notify-note">No spam. One email when the app goes live.</p>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="nav-logo" style="gap:8px">
+    <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;">Fuel<span style="color:oklch(78% 0.18 85)">ler</span></span>
+  </div>
+  <div class="footer-links">
+    <a href="mailto:hello@fueller.app">hello@fueller.app</a>
+    <span style="color:oklch(32% 0.01 60)">·</span>
+    <span>© 2026 Fueller</span>
+    <span style="color:oklch(32% 0.01 60)">·</span>
+    <span>Made in the UK 🇬🇧</span>
+  </div>
+</footer>
+
+<!-- Phone mockup React component -->
+<script type="text/babel" src="android-frame.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+
+<script type="text/babel">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accentColor": "amber",
+  "showPhoneMockup": true,
+  "heroSize": "compact",
+  "showHowItWorks": true,
+  "showFeatures": true,
+  "ctaStyle": "email"
+}/*EDITMODE-END*/;
+
+// ── App UI mock inside the phone ──
+function AppMockUI() {
+  const [tab, setTab] = React.useState('list');
+  const stations = [
+    { name: 'Tesco Petrol', dist: '0.3 mi', petrol: '142.9', diesel: '145.1', brand: 'T' },
+    { name: 'BP Station', dist: '0.6 mi', petrol: '144.5', diesel: '146.8', brand: 'B' },
+    { name: 'Shell Garage', dist: '0.9 mi', petrol: '145.2', diesel: '147.3', brand: 'S' },
+    { name: 'Asda Fuel', dist: '1.1 mi', petrol: '143.7', diesel: '145.9', brand: 'A' },
+  ];
+
+  const mockStyles = {
+    root: { background: '#0f0e0d', height: '100%', display: 'flex', flexDirection: 'column', fontFamily: "'DM Sans', sans-serif", overflow: 'hidden' },
+    topbar: { padding: '14px 16px 10px', borderBottom: '1px solid #2a2820' },
+    topLabel: { fontSize: 10, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#8a8272', marginBottom: 4 },
+    topTitle: { fontSize: 20, fontWeight: 700, color: '#f2ede8', fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: '-0.01em' },
+    tabs: { display: 'flex', padding: '10px 16px 0', gap: 0, borderBottom: '1px solid #2a2820' },
+    tab: (active) => ({ flex: 1, textAlign: 'center', padding: '8px 0', fontSize: 13, fontWeight: 600, color: active ? 'oklch(78% 0.18 85)' : '#8a8272', borderBottom: active ? '2px solid oklch(78% 0.18 85)' : '2px solid transparent', cursor: 'pointer', transition: 'all 0.15s', background: 'none', border: 'none', borderBottom: active ? '2px solid oklch(78% 0.18 85)' : '2px solid transparent' }),
+    list: { flex: 1, overflowY: 'auto', padding: '0 0 8px' },
+    station: (best) => ({ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', borderBottom: '1px solid #1e1d1a', background: best ? 'oklch(72% 0.18 145 / 0.05)' : 'none' }),
+    brandBadge: (best) => ({ width: 34, height: 34, borderRadius: 8, background: best ? 'oklch(72% 0.18 145 / 0.15)' : '#1e1d1a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: best ? 'oklch(72% 0.18 145)' : '#8a8070', flexShrink: 0, border: best ? '1px solid oklch(72% 0.18 145 / 0.3)' : '1px solid #2a2820' }),
+    stationInfo: { flex: 1 },
+    stationName: { fontSize: 13, fontWeight: 600, color: '#f2ede8', marginBottom: 2 },
+    stationDist: { fontSize: 11, color: '#8a8272' },
+    prices: { textAlign: 'right' },
+    priceMain: (best) => ({ fontSize: 18, fontWeight: 800, fontFamily: "'Barlow Condensed', sans-serif", color: best ? 'oklch(72% 0.18 145)' : '#f2ede8', lineHeight: 1 }),
+    priceLabel: { fontSize: 10, color: '#8a8272', marginTop: 2 },
+    mapPlaceholder: { flex: 1, background: '#161512', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 8 },
+    mapText: { fontSize: 12, color: '#4a4540', textAlign: 'center' },
+    bottomBar: { display: 'flex', borderTop: '1px solid #2a2820', padding: '8px 0 4px' },
+    navItem: (active) => ({ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, cursor: 'pointer' }),
+    navIcon: (active) => ({ fontSize: 18, color: active ? 'oklch(78% 0.18 85)' : '#6b6055' }),
+    navLabel: (active) => ({ fontSize: 10, fontWeight: 500, color: active ? 'oklch(78% 0.18 85)' : '#6b6055' }),
+  };
+
+  return (
+    <div style={mockStyles.root}>
+      <div style={mockStyles.topbar}>
+        <div style={mockStyles.topLabel}>Nearby stations</div>
+        <div style={mockStyles.topTitle}>142.9p/gal cheapest nearby</div>
+      </div>
+      <div style={mockStyles.tabs}>
+        <button style={{...mockStyles.tab(tab==='list'), border: 'none', outline: 'none', cursor: 'pointer'}} onClick={() => setTab('list')}>List</button>
+        <button style={{...mockStyles.tab(tab==='map'), border: 'none', outline: 'none', cursor: 'pointer'}} onClick={() => setTab('map')}>Map</button>
+        <button style={{...mockStyles.tab(tab==='filter'), border: 'none', outline: 'none', cursor: 'pointer'}} onClick={() => setTab('filter')}>Filter</button>
+      </div>
+      {tab === 'list' && (
+        <div style={mockStyles.list}>
+          {stations.map((s, i) => (
+            <div key={i} style={mockStyles.station(i === 0)}>
+              <div style={mockStyles.brandBadge(i === 0)}>{s.brand}</div>
+              <div style={mockStyles.stationInfo}>
+                <div style={mockStyles.stationName}>{s.name}</div>
+                <div style={mockStyles.stationDist}>{s.dist} away</div>
+              </div>
+              <div style={mockStyles.prices}>
+                <div style={mockStyles.priceMain(i === 0)}>{s.petrol}</div>
+                <div style={mockStyles.priceLabel}>p/gallon</div>
+              </div>
+            </div>
+          ))}
         </div>
-        <div class="price-card mid">
-          <div class="fuel-type">Diesel</div>
-          <div class="price">145.7</div>
-          <div class="price-unit">p/litre</div>
+      )}
+      {tab === 'map' && (
+        <div style={mockStyles.mapPlaceholder}>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 9m0 8V9m0 0L9 7" stroke="#4a4540" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          <div style={mockStyles.mapText}>Map view<br/>Coming soon</div>
         </div>
-        <div class="price-card">
-          <div class="fuel-type">Premium</div>
-          <div class="price">148.2</div>
-          <div class="price-unit">p/litre</div>
+      )}
+      {tab === 'filter' && (
+        <div style={mockStyles.mapPlaceholder}>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V20l-4-2v-5.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" stroke="#4a4540" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          <div style={mockStyles.mapText}>Filter by fuel type,<br/>brand, distance</div>
+        </div>
+      )}
+      <div style={mockStyles.bottomBar}>
+        <div style={mockStyles.navItem(true)}>
+          <div style={mockStyles.navIcon(true)}>⛽</div>
+          <div style={mockStyles.navLabel(true)}>Nearby</div>
+        </div>
+        <div style={mockStyles.navItem(false)}>
+          <div style={mockStyles.navIcon(false)}>🔖</div>
+          <div style={mockStyles.navLabel(false)}>Saved</div>
+        </div>
+        <div style={mockStyles.navItem(false)}>
+          <div style={mockStyles.navIcon(false)}>⚙️</div>
+          <div style={mockStyles.navLabel(false)}>Settings</div>
         </div>
       </div>
     </div>
+  );
+}
 
-    <!-- Feature pills -->
-    <div class="features">
-      <div class="pill"><span class="emoji">⚡</span> One-tap search</div>
-      <div class="pill"><span class="emoji">🏛️</span> UK Government data</div>
-      <div class="pill"><span class="emoji">🔒</span> No sign-up needed</div>
-      <div class="pill"><span class="emoji">💰</span> Always free</div>
-      <div class="pill"><span class="emoji">🗺️</span> Map view included</div>
-    </div>
-
-    <!-- Google Play coming soon -->
-    <div class="coming-soon">
-      <!-- Google Play logo -->
-      <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M3.5 3.5 L14.5 14 L3.5 24.5 L3.5 3.5Z" fill="#34A853"/>
-        <path d="M3.5 3.5 L18 10.5 L14.5 14 L3.5 3.5Z" fill="#FBBC04"/>
-        <path d="M3.5 24.5 L14.5 14 L18 17.5 L3.5 24.5Z" fill="#EA4335"/>
-        <path d="M18 10.5 L24 14 L18 17.5 L14.5 14 L18 10.5Z" fill="#4285F4"/>
-      </svg>
-      <div class="coming-soon-text">
-        <div class="label">Coming soon on</div>
-        <div class="store">Google Play</div>
+function PhoneSection({ tweaks }) {
+  if (!tweaks.showPhoneMockup) return null;
+  return (
+    <div className="phone-section">
+      <div className="phone-section-text reveal">
+        <p className="section-eyebrow">The app</p>
+        <h2 className="section-title" style={{marginBottom: 16}}>Your cheapest fill-up,<br/>always one tap away.</h2>
+        <p style={{fontSize: 15, color: 'var(--text-3)', lineHeight: 1.7, textWrap: 'pretty'}}>
+          A clean, fast list of nearby stations sorted by price. Switch to the map. Filter by fuel type. No clutter. Just the data you need to save money on every fill-up.
+        </p>
+      </div>
+      <div className="phone-wrapper reveal">
+        <AndroidDevice statusBarColor="#0f0e0d" navBarColor="#0f0e0d">
+          <AppMockUI />
+        </AndroidDevice>
       </div>
     </div>
+  );
+}
 
-  </main>
+function TweaksApp() {
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
 
-  <footer>
-    <p>&copy; 2026 Fueller &nbsp;·&nbsp; <a href="mailto:hello@fueller.app">hello@fueller.app</a> &nbsp;·&nbsp; Made in the UK 🇬🇧</p>
-  </footer>
+  return (
+    <>
+      <PhoneSection tweaks={tweaks} />
+      <TweaksPanel>
+        <TweakSection title="Visual">
+          <TweakToggle label="Show phone mockup" value={tweaks.showPhoneMockup} onChange={v => setTweak('showPhoneMockup', v)} />
+          <TweakRadio label="Hero size" options={['compact', 'large']} value={tweaks.heroSize} onChange={v => setTweak('heroSize', v)} />
+        </TweakSection>
+        <TweakSection title="Sections">
+          <TweakToggle label="How it works" value={tweaks.showHowItWorks} onChange={v => setTweak('showHowItWorks', v)} />
+          <TweakToggle label="Features grid" value={tweaks.showFeatures} onChange={v => setTweak('showFeatures', v)} />
+        </TweakSection>
+        <TweakSection title="CTA style">
+          <TweakRadio label="Bottom CTA" options={['email', 'badge']} value={tweaks.ctaStyle} onChange={v => setTweak('ctaStyle', v)} />
+        </TweakSection>
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('phone-section-root')).render(<TweaksApp />);
+</script>
+
+<script>
+// ── Scroll reveal ──
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+// ── Animated price counters ──
+function animateValue(el, from, to, duration) {
+  const start = performance.now();
+  function update(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = (from + (to - from) * eased).toFixed(1);
+    if (t < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+const priceObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      animateValue(document.getElementById('p-petrol'), 150, 142.9, 900);
+      animateValue(document.getElementById('p-diesel'), 155, 145.7, 1100);
+      animateValue(document.getElementById('p-premium'), 158, 148.2, 1300);
+      priceObserver.disconnect();
+    }
+  });
+}, { threshold: 0.5 });
+
+const widget = document.querySelector('.price-widget');
+if (widget) priceObserver.observe(widget);
+
+// ── Notify form ──
+document.getElementById('notify-btn').addEventListener('click', function() {
+  const input = document.getElementById('email-input');
+  const success = document.getElementById('notify-success');
+  if (input.value && input.value.includes('@')) {
+    input.style.display = 'none';
+    this.style.display = 'none';
+    success.classList.add('show');
+  } else {
+    input.style.borderColor = 'oklch(65% 0.18 25)';
+    input.focus();
+  }
+});
+</script>
 
 </body>
 </html>
