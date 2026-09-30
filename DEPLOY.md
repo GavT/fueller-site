@@ -20,7 +20,7 @@ From your local machine, in the folder containing these files:
 ```bash
 git init
 git add .
-git commit -m "Initial holding page"
+git commit -m "Initial site"
 git branch -M main
 git remote add origin https://github.com/GavT/fueller-site.git
 git push -u origin main
@@ -74,12 +74,12 @@ The `CNAME` file in the repo root does this automatically when you push, but con
 
 ## Updating the site
 
-Any push to the `main` branch will automatically redeploy within ~1 minute. No build step needed — it's a plain HTML file.
+Any push to the `main` branch will automatically redeploy within ~1 minute. No build step needed — it's plain static HTML and CSS.
 
 ```bash
-# Make your edits to index.html, then:
-git add index.html
-git commit -m "Update holding page"
+# Make your edits, then:
+git add .
+git commit -m "Update site"
 git push
 ```
 
@@ -89,6 +89,11 @@ git push
 
 ```
 fueller-site/
-├── index.html   # The holding page
+├── index.html   # The one-page site
+├── styles.css   # All styles (colours as CSS variables in :root)
+├── assets/      # Logo mark, app icon and app screenshots
+├── favicon.png
 └── CNAME        # Custom domain — do not delete this
 ```
+
+The sign-up button in the final section links to `SIGNUP_URL` in `index.html`; replace it with the real form or waitlist link.
