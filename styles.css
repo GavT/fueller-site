@@ -42,3 +42,14 @@ footer{border-top:1px solid var(--rule-dark);padding:24px 0;font-size:14px;color
 footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px}
 footer .word{font-size:18px}
 @media (max-width:820px){.hero{grid-template-columns:1fr;padding-top:24px}.hero .phone{width:272px}}
+.cta .fine{font-size:14px;max-width:44ch;color:var(--footer-text)}
+.cta .fine a{color:var(--amber)}
+.cta .fine a:hover{color:#FFFFFF}
+.legal{padding:48px 0 96px;max-width:70ch}
+.legal h1{font-family:Inter,system-ui,sans-serif;font-weight:900;font-size:clamp(30px,4vw,44px);letter-spacing:-0.03em;line-height:1.08;margin:0 0 8px}
+.legal h2{font-size:22px;margin:40px 0 8px;max-width:none}
+.legal .meta{color:var(--muted-light);margin:0 0 32px}
+.legal ul{padding-left:20px}
+.legal a{text-decoration:underline}
+footer .wrap a{color:var(--footer-text)}
+footer .wrap a:hover{color:var(--amber)}
