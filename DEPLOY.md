@@ -90,10 +90,11 @@ git push
 ```
 fueller-site/
 ├── index.html   # The one-page site
+├── privacy.html # Privacy notice
 ├── styles.css   # All styles (colours as CSS variables in :root)
 ├── assets/      # Logo mark, app icon and app screenshots
 ├── favicon.png
 └── CNAME        # Custom domain — do not delete this
 ```
 
-The sign-up button in the final section links to `SIGNUP_URL` in `index.html`; replace it with the real form or waitlist link.
+The sign-up button in the final section is a `mailto:` link to `hello@fueller.app`. Sign-ups arrive as emails; `privacy.html` is the UK GDPR privacy notice and should be kept in step with how the list is used.
